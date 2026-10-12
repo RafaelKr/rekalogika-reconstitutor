@@ -431,4 +431,46 @@ final class TransactionTest extends EntityTestCase
             'onClear',
         ]);
     }
+
+    public function testLoadBeginRemoveFlushFlushRollback(): void
+    {
+        $this->init();
+
+        $this->load();
+        $this->begin();
+        $this->remove();
+        $this->flush();
+        $this->flush();
+        $this->rollback();
+
+        $this->assertImagePresent();
+
+        $this->assertEvents([
+            'onLoad',
+        ]);
+    }
+
+    /**
+     * The object is persisted again after its removal has been flushed
+     */
+    public function testLoadBeginRemoveFlushPersistFlushCommit(): void
+    {
+        $this->init();
+
+        $this->load();
+        $this->begin();
+        $this->remove();
+        $this->flush();
+        $this->persist();
+        $this->flush();
+        $this->commit();
+
+        $this->assertImagePresent();
+
+        $this->assertEvents([
+            'onLoad',
+            'onCreate',
+            'onSave',
+        ]);
+    }
 }
